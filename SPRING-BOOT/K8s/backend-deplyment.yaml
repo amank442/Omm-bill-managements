@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: omm-spring-deployment
+  name: omm-spring-deployments
 spec:
   selector:
     matchLabels:
