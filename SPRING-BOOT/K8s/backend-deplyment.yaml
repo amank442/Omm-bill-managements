@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: spring-boot
-        image: cicdmicrosvc1-d4g7c6aehxc5amfa.azurecr.io/omm-spring:tag
+        image: "cicdmicrosvc1-d4g7c6aehxc5amfa.azurecr.io/omm-spring:tag"
         ports:
         - containerPort: 3000
         # env:
