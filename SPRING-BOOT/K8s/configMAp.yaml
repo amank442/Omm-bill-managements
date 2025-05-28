@@ -8,3 +8,4 @@ data:
   JPA_DIALECT: org.hibernate.dialect.MySQLDialect
   JPA_SHOW_SQL: 'FALSE'
   JPA_HBM2DDL_AUTO: update
+  PORT: "8081"
