@@ -16,7 +16,7 @@ spec:
       - name: spring-boot
         image: cicdmicrosvc1-d4g7c6aehxc5amfa.azurecr.io/omm-spring:tag
         ports:
-        - containerPort: 3001
+        - containerPort: 8081
         # env:
 
         # - name: USER
@@ -80,4 +80,4 @@ spec:
   ports:
   - protocol: TCP
     port: 8081
-    targetPort: 3001
+    targetPort: 8081
