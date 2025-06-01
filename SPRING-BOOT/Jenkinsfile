@@ -24,13 +24,13 @@ pipeline{
         
         
         
-        stages {
-        stage('Checkout code'){
-            steps {
-                git url: 'https://github.com/amank442/Omm-bill-managements.git',
-                branch: 'main'
-            }
-        }
+        // stages {
+        // stage('Checkout code'){
+        //     steps {
+        //         git url: 'https://github.com/amank442/Omm-bill-managements.git',
+        //         branch: 'main'
+        //     }
+        // }
         
         stage('Build Spring'){
             steps{
@@ -58,45 +58,59 @@ pipeline{
             }
         }
         
-           stage('Login to ACR'){
+           stage('Login AND Push to ACR'){
             steps{
                 withCredentials([usernamePassword(credentialsId:'acr-creds',usernameVariable:'USERNAME',passwordVariable:'PASSWORD')]){
                     sh """ docker login ${ACR_NAME}.azurecr.io -u ${USERNAME} -p ${PASSWORD} """
                 }
-            }
-        }
-        
-              stage('Push to ACR'){
-            steps {
                 sh 'docker push ${ACR_IMAGE}'
             }
         }
         
+        //       stage('Push to ACR'){
+        //     steps {
+        //         sh 'docker push ${ACR_IMAGE}'
+        //     }
+        // }
+        
             
-        stage('Prepare K8s'){
+        stage('LOGIN TO AKS AND DEPLOYMENT'){
             steps{
                 withCredentials([file(credentialsId:'aks-kubeconfig',variable:'KUBECONFIG_FILE')]){
                     sh 'rm -f $KUBECONFIG'
                     sh 'cp $KUBECONFIG_FILE $KUBECONFIG'
                 }
-            }
-        }
-        
-        stage('Deploy to AKS'){
-            steps{
                 script{
                     sh "sed -i \"s/tag/${IMAGE_TAG}/g\" SPRING-BOOT/K8s/backend-deplyment.yaml"
                     
                 }
-                sh """
+                 sh """
                
                 kubectl apply -f SPRING-BOOT/K8s/configMAp.yaml
                 kubectl apply -f SPRING-BOOT/K8s/Secret.yaml
                  kubectl apply -f SPRING-BOOT/K8s/backend-deplyment.yaml
                 
                 """
+
+
             }
         }
+        
+        // stage('Deploy to AKS'){
+        //     steps{
+        //         script{
+        //             sh "sed -i \"s/tag/${IMAGE_TAG}/g\" SPRING-BOOT/K8s/backend-deplyment.yaml"
+                    
+        //         }
+        //         sh """
+               
+        //         kubectl apply -f SPRING-BOOT/K8s/configMAp.yaml
+        //         kubectl apply -f SPRING-BOOT/K8s/Secret.yaml
+        //          kubectl apply -f SPRING-BOOT/K8s/backend-deplyment.yaml
+                
+        //         """
+        //     }
+        // }
         
         
         
