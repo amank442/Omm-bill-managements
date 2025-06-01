@@ -1,0 +1,108 @@
+pipeline{
+    agent any
+    
+     parameters {
+        string(name: 'SERVICE_NAME', defaultValue: 'omm-spring' , description : 'Image / repository name')
+        string(name: 'IMAGE_TAG', defaultValue: "" , description : 'Docker Image Tag')
+    }
+        
+        environment {
+       MAVEN_HOME = tool name: 'jenkins-maven'
+       JAVA = tool name: 'jdk-21'
+     Local_Image = "${params.SERVICE_NAME}:${params.IMAGE_TAG != '' ? params.IMAGE_TAG : BUILD_NUMBER}"
+     ACR_NAME = 'cicdmicrosvc1-d4g7c6aehxc5amfa'
+      KUBECONFIG = "${WORKSPACE}/kubeconfig"
+      IMAGE_TAG = "${BUILD_NUMBER}"
+     ACR_IMAGE = "${ACR_NAME}.azurecr.io/${params.SERVICE_NAME}:${params.IMAGE_TAG != '' ? params.IMAGE_TAG : BUILD_NUMBER}"
+       
+       
+       
+       
+       
+    }
+        
+        
+        
+        
+        stages {
+        stage('Checkout code'){
+            steps {
+                git url: 'https://github.com/amank442/Omm-bill-managements.git',
+                branch: 'main'
+            }
+        }
+        
+        stage('Build Spring'){
+            steps{
+                dir('SPRING-BOOT'){
+                     sh "${MAVEN_HOME}/bin/mvn clean package -DskipTests"
+                }
+            }
+        }
+        
+          stage('Docker Build'){
+            steps{
+                sh "docker build -f SPRING-BOOT/Dockerfile -t ${Local_Image} SPRING-BOOT"
+            }
+        }
+        
+         stage('Triviy Scan'){
+            steps{
+                sh """ trivy image --timeout 25m --format table --severity CRITICAL,HIGH ${Local_Image} """
+            }
+        }
+        
+         stage('Tag for ACR'){
+            steps{
+                sh """ docker tag ${Local_Image} ${ACR_IMAGE} """
+            }
+        }
+        
+           stage('Login to ACR'){
+            steps{
+                withCredentials([usernamePassword(credentialsId:'acr-creds',usernameVariable:'USERNAME',passwordVariable:'PASSWORD')]){
+                    sh """ docker login ${ACR_NAME}.azurecr.io -u ${USERNAME} -p ${PASSWORD} """
+                }
+            }
+        }
+        
+              stage('Push to ACR'){
+            steps {
+                sh 'docker push ${ACR_IMAGE}'
+            }
+        }
+        
+            
+        stage('Prepare K8s'){
+            steps{
+                withCredentials([file(credentialsId:'aks-kubeconfig',variable:'KUBECONFIG_FILE')]){
+                    sh 'rm -f $KUBECONFIG'
+                    sh 'cp $KUBECONFIG_FILE $KUBECONFIG'
+                }
+            }
+        }
+        
+        stage('Deploy to AKS'){
+            steps{
+                script{
+                    sh "sed -i \"s/tag/${IMAGE_TAG}/g\" SPRING-BOOT/K8s/backend-deplyment.yaml"
+                    
+                }
+                sh """
+               
+                kubectl apply -f SPRING-BOOT/K8s/configMAp.yaml
+                kubectl apply -f SPRING-BOOT/K8s/Secret.yaml
+                 kubectl apply -f SPRING-BOOT/K8s/backend-deplyment.yaml
+                
+                """
+            }
+        }
+        
+        
+        
+        
+     
+     
+        
+    }
+}
