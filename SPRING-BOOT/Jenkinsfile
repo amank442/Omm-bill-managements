@@ -48,7 +48,17 @@ pipeline{
         
          stage('Triviy Scan'){
             steps{
-                sh """ trivy image --timeout 25m --format template --template "@contrib/html.tpl" --output trivy-report.html --severity CRITICAL,HIGH ${Local_Image} """
+                sh """ 
+
+                [-f html.tpl] || curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o html.tpl
+
+                 trivy image --timeout 25m --format template --template "@./html.tpl" --output trivy-report.html --severity CRITICAL,HIGH ${Local_Image} 
+                 
+                 wkhtmltopdf trivy-report.html trivy-report.pdf 
+                 
+                 """
+
+                 archiveArtificats artifacts: trivy-report.pdf , fingerprint: true
             }
         }
         
