@@ -52,7 +52,7 @@ pipeline{
 
                 [-f html.tpl] || curl -L https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o html.tpl
 
-                 trivy image --timeout 25m --format json --output trivy-report.json --severity CRITICAL,HIGH --scanners misconfig vuln,config ${Local_Image} 
+                 trivy image --timeout 25m --format template --template @./html.tpl --output trivy-report.html --severity CRITICAL,HIGH --scanners misconfig vuln,config ${Local_Image} 
                  
                  wkhtmltopdf trivy-report.html trivy-report.pdf 
                  
