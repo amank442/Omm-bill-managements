@@ -48,7 +48,7 @@ pipeline{
         
          stage('Triviy Scan'){
             steps{
-                sh """ trivy image --timeout 25m --format table --severity CRITICAL,HIGH ${Local_Image} """
+                sh """ trivy image --timeout 25m --format template --template "@contrib/html.tpl" --output trivy-report.html --severity CRITICAL,HIGH ${Local_Image} """
             }
         }
         
