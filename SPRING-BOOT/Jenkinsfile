@@ -48,13 +48,12 @@ pipeline{
         
          stage('Triviy Scan'){
             steps{
-                sh """ 
+            
 
-                trivy image --format  template --template @/usr/share/trivy/templates/html.tpl  -o trivy_report.html   --severity CRITICAL,HIGH ${Local_Image}
+              sh """  trivy image --format  template --template @/usr/share/trivy/templates/html.tpl  -o trivy_report.html   --severity CRITICAL,HIGH ${Local_Image}
                        wkhtmltopdf trivy_report.html trivy_report.pdf 
-                 """
-
-                 archiveArtificats artifacts: trivy-report.pdf , fingerprint: true
+                """
+                 archiveArtifacts artifacts: 'trivy_report.pdf'
             }
         }
         
