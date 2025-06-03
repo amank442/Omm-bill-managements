@@ -72,15 +72,15 @@ spec:
           httpGet:
             path: /userapi
             port: 8081
-          initialDelaySecond: 5
-          peroidSecond: 10
+          initialDelaySeconds: 5
+          periodSeconds: 10
 
         livenessProbe:
           httpGet:
             path: /userapi
             port: 8081
-          initialDelaySecond: 15
-          periordSecond: 20
+          initialDelaySeconds: 15
+          periodSeconds: 20
 ---
 
 apiVersion: v1
