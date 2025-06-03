@@ -9,6 +9,6 @@ public class Healthcontroller {
 
 @GetMapping("/health")
 public ResponseEntity<String> healthcheck(){
-    return ResponseEntity.OK("Spring Boot svc runnig.")
+    return ResponseEntity.OK("Spring Boot svc runnig.");
 }
 }
